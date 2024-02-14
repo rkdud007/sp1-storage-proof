@@ -1,0 +1,11 @@
+[package]
+name = "coprocessor"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+revm = { git = "https://github.com/bluealloy/revm" }
+ethers-core = "2.0.13"
+ethers-contract = "2.0.13"
