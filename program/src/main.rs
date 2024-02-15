@@ -5,7 +5,11 @@
 use std::str::FromStr as _;
 
 use alloy_dyn_abi::DynSolType;
-use alloy_primitives::{hex::FromHex, keccak256, FixedBytes, Keccak256, U256};
+use alloy_primitives::{
+    hex::{self, FromHex},
+    keccak256, FixedBytes, Keccak256, U256,
+};
+use rlp::Rlp;
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
@@ -20,43 +24,54 @@ pub fn main() {
 
     println!("Step 0 - Reading input from the zkVM");
 
-    let mut hasher = Keccak256::new();
-    // Step1. Calculate the leaf node
-    let key = Vec::from_hex(storage_key).unwrap();
-    let storage_value = U256::from_str(&storage_value).unwrap();
-    let bytes: [u8; 32] = storage_value.to_be_bytes();
-    hasher.update(key);
-    // U256 to bytes
-    hasher.update(bytes);
+    //=========================================================================
 
-    let leaf_hash = keccak256(hasher.clone().finalize());
-    // let leaf_hash_formated = format!("0x{:x}", leaf_hash);
+    // Step 1. Compute the key hash of target node
+    let mut hasher = Keccak256::new();
+    // [KEY] Current node's key is keccak256(storage_slot)
+    hasher.update(storage_key);
+    let key_hash = hasher.finalize();
+    println!("current key: \n{}\n", key_hash);
+
+    // Step 2. Verify the merkle proof
+    let mut current_hash = key_hash;
 
     // Decode serialized siblings
     let siblings_type: DynSolType = "bytes[]".parse().unwrap();
     let bytes = Vec::from_hex(siblings).expect("Invalid hex string");
     let serialized_siblings = siblings_type.abi_decode(&bytes).unwrap();
 
-    // Step 2. Verify the merkle proof
-    let mut current_hash = leaf_hash;
-
     if let Some(siblings) = serialized_siblings.as_array() {
         for sibling in siblings {
-            // Depending on the Merkle tree structure, you might need to adjust the order
-            // of concatenation. This example assumes the current hash is left and the proof element is right.
+            // Step 2: Decode the siblings
+            let sibling_hex = format!("0x{}", hex::encode(sibling.as_bytes().unwrap()));
+
+            let siblings_bytes = hex::decode(sibling_hex.as_bytes()).expect("Invalid hex string");
+            // RLP decode the RLP encoded node
+            let siblings_rlp = Rlp::new(&siblings_bytes);
+            let node: Vec<u8> = siblings_rlp.data().unwrap().to_vec();
+            // Step 2.1: Compute the Key of the sibling node
             hasher = Keccak256::new();
-            hasher.update(current_hash);
-            hasher.update(sibling.as_bytes().unwrap());
+            hasher.update(node);
             current_hash = hasher.finalize();
+            println!("sibling key: \n{:?}\n", current_hash);
         }
     }
 
     // Step 3. Verify the root
     let root_bytes: FixedBytes<32> = FixedBytes::from_hex(root).unwrap();
+    // Computed hash should match the given root
     if current_hash != root_bytes.as_slice() {
-        panic!("Invalid merkle proof");
+        println!(
+            "original root: \n{:?}\n",
+            hex::encode(root_bytes.as_slice())
+        );
+
+        panic!("Invalid merkle proof :/");
     }
-    println!("Merkle proof verified");
+    println!("✅ åMerkle proof verified");
+
+    //=========================================================================
 
     sp1_zkvm::io::write(&storage_value);
 }
