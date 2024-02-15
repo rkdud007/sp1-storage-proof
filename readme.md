@@ -2,6 +2,11 @@
 
 Goal: program that verify storage proof
 
+## Full Flow
+
+Cannot debug easily in sp1 environment.
+https://github.com/rkdud007/playground/blob/main/sp1/src/main.rs for dev purpose
+
 ## Example data
 
 ```js
