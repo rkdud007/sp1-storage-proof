@@ -2,8 +2,10 @@
 
 #![no_main]
 
+use std::str::FromStr as _;
+
 use alloy_dyn_abi::DynSolType;
-use alloy_primitives::{hex::FromHex, keccak256, FixedBytes, Keccak256};
+use alloy_primitives::{hex::FromHex, keccak256, FixedBytes, Keccak256, U256};
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
@@ -21,12 +23,14 @@ pub fn main() {
     let mut hasher = Keccak256::new();
     // Step1. Calculate the leaf node
     let key = Vec::from_hex(storage_key).unwrap();
-    let value: Vec<u8> = Vec::from_hex(&storage_value).unwrap();
-
+    let storage_value = U256::from_str(&storage_value).unwrap();
+    let bytes: [u8; 32] = storage_value.to_be_bytes();
     hasher.update(key);
-    hasher.update(value);
+    // U256 to bytes
+    hasher.update(bytes);
 
     let leaf_hash = keccak256(hasher.clone().finalize());
+    // let leaf_hash_formated = format!("0x{:x}", leaf_hash);
 
     // Decode serialized siblings
     let siblings_type: DynSolType = "bytes[]".parse().unwrap();
@@ -38,11 +42,12 @@ pub fn main() {
 
     if let Some(siblings) = serialized_siblings.as_array() {
         for sibling in siblings {
-            let mut hasher = Keccak256::new();
-            let current_bytes: Vec<u8> = Vec::from_hex(current_hash).unwrap();
-            hasher.update(current_bytes);
+            // Depending on the Merkle tree structure, you might need to adjust the order
+            // of concatenation. This example assumes the current hash is left and the proof element is right.
+            hasher = Keccak256::new();
+            hasher.update(current_hash);
             hasher.update(sibling.as_bytes().unwrap());
-            current_hash = keccak256(hasher.clone().finalize());
+            current_hash = hasher.finalize();
         }
     }
 
