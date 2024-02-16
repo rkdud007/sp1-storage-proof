@@ -1324,7 +1324,7 @@ dependencies = [
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
-source = "git+https://github.com/succinctlabs/tiny-keccak-private.git#7ff8a065b9f1414adb60d9aef3859f28705863ea"
+source = "git+https://github.com/succinctlabs/tiny-keccak-private.git?branch=chris/test#aa70bacdfece9dc7ea4936f808887c43a09b3b0a"
 dependencies = [
  "cfg-if",
  "crunchy",
