@@ -6,8 +6,8 @@ edition = "2021"
 
 [dependencies]
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git" }
-alloy-primitives = "0.6.2"
-alloy-dyn-abi = "0.6.2"
+alloy-primitives = { git = "https://github.com/succinctlabs/alloy-core-private.git" }
+alloy-dyn-abi = { git = "https://github.com/succinctlabs/alloy-core-private.git" }
 rlp = "0.4.6"
 tiny-keccak = { version = "2.0", features = ["keccak"] }
 

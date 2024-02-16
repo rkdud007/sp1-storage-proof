@@ -4,9 +4,8 @@ version = 3
 
 [[package]]
 name = "alloy-dyn-abi"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13b1a44ed6b4126e4818d20c9e48176ae9d6d4fcbe6c909f8cd0bf050eb56fd8"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "alloy-json-abi",
  "alloy-primitives",
@@ -21,9 +20,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-json-abi"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30c6a6c5140fc762edfe55349f9ddefa821f4b7f2339cef582de911a3f1fb6d3"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-type-parser",
@@ -33,9 +31,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-primitives"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef197eb250c64962003cb08b90b17f0882c192f4a6f2f544809d424fd7cb0e7d"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "alloy-rlp",
  "bytes",
@@ -65,9 +62,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-sol-macro"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82e92100dee7fd1e44abbe0ef6607f18758cf0ad4e483f4c65ff5c8d85428a6d"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "const-hex",
  "dunce",
@@ -76,25 +72,23 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
  "syn-solidity",
  "tiny-keccak",
 ]
 
 [[package]]
 name = "alloy-sol-type-parser"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d146adca22a853b5aaaa98a6c78bd9d8f1d627ca7b01d170edccf45430e9b2cb"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "winnow",
 ]
 
 [[package]]
 name = "alloy-sol-types"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e7c6a8c492b1d6a4f92a8fc6a13cf39473978dd7d459d7221969ce5a73d97cd"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-macro",
@@ -246,7 +240,7 @@ checksum = "823b8bb275161044e2ac7a25879cb3e2480cb403e3943022c7c769c599b756aa"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
 ]
 
 [[package]]
@@ -1157,7 +1151,7 @@ checksum = "33c85360c95e7d137454dc81d9a4ed2b8efd8fbe19cee57357b32b9771fccb67"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
 ]
 
 [[package]]
@@ -1216,7 +1210,7 @@ dependencies = [
 [[package]]
 name = "sp1-zkvm"
 version = "0.1.0"
-source = "git+https://github.com/succinctlabs/sp1.git#54b64b646d18cabef3307bb90167d23470736dc3"
+source = "git+https://github.com/succinctlabs/sp1.git#e19f74222f66bb83aeb56f3a4d022a55bbfac793"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1262,9 +1256,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.48"
+version = "2.0.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f3531638e407dfc0814761abb7c00a5b54992b849452a0646b7f65c9f770f3f"
+checksum = "915aea9e586f80826ee59f8453c1101f9d1c4b3964cd2460185ee8e299ada496"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1273,14 +1267,13 @@ dependencies = [
 
 [[package]]
 name = "syn-solidity"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e656cbcef8a77543b5accbd76f60f9e0bc4be364b0aba4263a6f313f8a355511"
+version = "0.6.2"
+source = "git+https://github.com/succinctlabs/alloy-core-private.git#6f5688c6c28d773b465b8ab3330ed7c2bcf7bfb5"
 dependencies = [
  "paste",
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
 ]
 
 [[package]]
@@ -1318,7 +1311,7 @@ checksum = "a953cb265bef375dae3de6663da4d3804eee9682ea80d8e2542529b73c531c81"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
 ]
 
 [[package]]
@@ -1511,5 +1504,5 @@ checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.49",
 ]
