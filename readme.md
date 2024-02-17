@@ -2,7 +2,11 @@
 
 Disclamer: This project is under development, playing around with sp1 and alloy & reth codes
 
-## Goal: program that verify storage proof and return valid value of evm state
+## Goal
+
+```
+program that verify storage proof and return valid value of evm state
+```
 
 - 1. input : pass rpc `get_ethProof` response value as an input of the program
 - 2. process : calculate storage trie's root base on given path - probably need to add trie implementation, [there is gold reth code](https://github.com/paradigmxyz/reth/blob/39eb6c6d6e7a523705b34f8dc960148e37367d12/crates/trie/src/trie.rs#L467) that im referring
@@ -12,6 +16,24 @@ Disclamer: This project is under development, playing around with sp1 and alloy 
 
 Just sake of convineience, debugging in there
 https://github.com/rkdud007/playground/blob/main/sp1/src/main.rs for dev purpose
+
+## Quick Start
+
+Before, follow [SP1 installation](https://succinctlabs.github.io/sp1/getting-started/install.html)
+
+terminal 1:
+
+```
+❯ cd program
+❯ cargo prove build
+```
+
+terminal 2:
+
+```
+❯ cd script
+❯ cargo run --release
+```
 
 ## Input data format
 
@@ -36,7 +58,7 @@ pub struct StorageProof {
 
 ## FYI
 
-with `alloy` depend on `keccak` precompile library,
+with `alloy` depend on `keccak` [precompile library](https://succinctlabs.github.io/sp1/writing-programs/patched-crates.html),
 with computing 6 keccak hash speed around:
 
 ```
