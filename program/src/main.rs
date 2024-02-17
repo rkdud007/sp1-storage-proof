@@ -5,10 +5,9 @@
 use alloy_dyn_abi::DynSolType;
 use alloy_primitives::{
     hex::{self, FromHex},
-    FixedBytes,
+    keccak256, FixedBytes, Keccak256,
 };
 use rlp::Rlp;
-use tiny_keccak::{Hasher, Keccak};
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
@@ -27,12 +26,8 @@ pub fn main() {
 
     // Step 1. Compute the key hash of target node
     // [KEY] Current node's key is keccak256(storage_slot)
-    let mut keccak = Keccak::v256();
-    keccak.update(storage_key.as_bytes());
-    let mut output = [0u8; 32];
-    keccak.finalize(&mut output);
-    let key_hash = output;
-    println!("current key: \n{:?}\n", key_hash);
+    let key_hash = keccak256(storage_key.as_bytes());
+    println!("current key: \n{}\n", key_hash);
 
     // Step 2. Verify the merkle proof
     let mut current_hash = key_hash;
@@ -52,12 +47,10 @@ pub fn main() {
             let node = siblings_rlp.data().unwrap();
 
             // Step 2.1: Compute the Key of the sibling node
-            let mut keccak = Keccak::v256();
-            keccak.update(node);
-            keccak.update(&current_hash);
-            let mut output = [0u8; 32];
-            keccak.finalize(&mut output);
-            current_hash = output;
+            let mut hasher = Keccak256::new();
+            hasher.update(node);
+            hasher.update(current_hash);
+            current_hash = hasher.finalize();
 
             println!("sibling key: \n{:?}\n", current_hash);
         }
