@@ -1,10 +1,88 @@
 //! A simple script to generate and verify the proof of a given program.
 
-use sp1_sdk::{ProverClient, SP1Stdin};
+use std::env;
+
+use hdp::{
+    hdp_run::HdpRunConfig,
+    preprocessor::{
+        compile::config::CompilerConfig, module_registry::ModuleRegistry, PreProcessor,
+    },
+    primitives::{
+        aggregate_fn::{AggregationFunction, FunctionContext},
+        task::{
+            datalake::{
+                block_sampled::BlockSampledDatalake, compute::Computation,
+                envelope::DatalakeEnvelope, DatalakeCompute,
+            },
+            module::{ModuleInput, Visibility},
+            TaskEnvelope,
+        },
+        ChainId,
+    },
+    processor,
+};
+use sp1_sdk::{utils, ProverClient, SP1Stdin};
 
 const ELF: &[u8] = include_bytes!("../../program/elf/riscv32im-succinct-zkvm-elf");
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    // Setup logging.
+    utils::setup_logger();
+
+    dotenv::dotenv().ok();
+
+    // =================
+    // hdp proof generation
+    // =================
+
+    // let module_regisry = ModuleRegistry::new();
+    // let module = module_regisry
+    //     .get_extended_module_from_class_source(
+    //         None,
+    //         Some("../private_module/target/dev/private_module_get_balance.compiled_contract_class.json".into()),
+    //         vec![
+    //             ModuleInput::new(Visibility::Private, "0x5222a4"),
+    //             ModuleInput::new(Visibility::Public, "0x00000000000000000000000013cb6ae34a13a0977f4d7101ebc24b87bb23f0d5" )
+    //         ],
+    //     )
+    //     .await
+    //     .unwrap();
+    let tasks = vec![TaskEnvelope::DatalakeCompute(DatalakeCompute {
+        datalake: DatalakeEnvelope::BlockSampled(BlockSampledDatalake::new(
+            ChainId::EthereumSepolia,
+            1039999,
+            10400000,
+            1,
+            "header.base_fee_per_gas".parse().unwrap(),
+        )),
+        compute: Computation {
+            aggregate_fn_id: AggregationFunction::AVG,
+            aggregate_fn_ctx: FunctionContext::default(),
+        },
+    })];
+    let pre_processor_output_file = "input.json";
+    let output_file = "output.json";
+    // let cairo_pie_file = "pie.zip";
+
+    let config = HdpRunConfig::init(
+        Some("../build/contract_dry_run.json".into()),
+        Some("../build/hdp.json".into()),
+        pre_processor_output_file.into(),
+        false,
+        None,
+        Some(output_file.into()),
+        None,
+    );
+
+    let compiler_config = CompilerConfig {
+        dry_run_program_path: config.dry_run_program_path.clone(),
+        provider_config: config.provider_config.clone(),
+        save_fetch_keys_file: config.save_fetch_keys_file.clone(),
+    };
+    let preprocessor = PreProcessor::new_with_config(compiler_config);
+    let preprocessor_result = preprocessor.process(tasks).await.unwrap();
+
     let start = std::time::Instant::now();
     // Generate proof.
     let mut stdin = SP1Stdin::new();
