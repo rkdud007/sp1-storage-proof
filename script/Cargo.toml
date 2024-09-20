@@ -1,12 +1,11 @@
-[workspace]
 [package]
 version = "0.1.0"
-name = "fibonacci-script"
+name = "sp1-hdp"
 edition = "2021"
 
 [dependencies]
 sp1-sdk = "2.0.0"
-hdp = { git = "https://github.com/HerodotusDev/hdp.git", features = [
+hdp = { git = "https://github.com/HerodotusDev/hdp.git", branch = "ux", features = [
     "test_utils",
 ] }
 tokio = { version = "1", features = ["full"] }

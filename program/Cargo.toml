@@ -10,6 +10,7 @@ alloy-primitives = { git = "https://github.com/succinctlabs/alloy-core-private.g
 alloy-dyn-abi = { git = "https://github.com/succinctlabs/alloy-core-private.git" }
 rlp = "0.4.6"
 tiny-keccak = { version = "2.0", features = ["keccak"] }
+serde = "1.0.210"
 
 [patch.crates-io]
 tiny-keccak = { git = "https://github.com/succinctlabs/tiny-keccak-private.git", branch = "chris/test" }
