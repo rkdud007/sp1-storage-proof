@@ -5,7 +5,7 @@ name = "sp1-evm-coprocessor"
 edition = "2021"
 
 [dependencies]
-sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git" }
+sp1-zkvm = "2.0.0"
 alloy-primitives = { git = "https://github.com/succinctlabs/alloy-core-private.git" }
 alloy-dyn-abi = { git = "https://github.com/succinctlabs/alloy-core-private.git" }
 rlp = "0.4.6"

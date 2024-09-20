@@ -5,4 +5,5 @@ name = "fibonacci-script"
 edition = "2021"
 
 [dependencies]
-sp1-core = { git = "https://github.com/succinctlabs/sp1.git" }
+sp1-sdk = "2.0.0"
+hdp = { git = "https://github.com/HerodotusDev/hdp.git" }

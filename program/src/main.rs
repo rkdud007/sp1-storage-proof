@@ -72,5 +72,5 @@ pub fn main() {
 
     //=========================================================================
 
-    sp1_zkvm::io::write(&storage_value);
+    sp1_zkvm::io::commit(&storage_value);
 }
