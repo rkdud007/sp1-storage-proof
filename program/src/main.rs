@@ -5,72 +5,138 @@
 use alloy_dyn_abi::DynSolType;
 use alloy_primitives::{
     hex::{self, FromHex},
-    keccak256, FixedBytes, Keccak256,
+    keccak256, Address, Bytes, FixedBytes, Keccak256, StorageKey, B256, U256,
 };
 use rlp::Rlp;
+use serde::{Deserialize, Serialize};
 sp1_zkvm::entrypoint!(main);
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProcessorInput {
+    // U256 type
+    pub tasks_root: B256,
+    // U256 type
+    pub results_root: B256,
+    pub proofs: Vec<ProcessedBlockProofs>,
+    pub tasks: Vec<ProcessedTask>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum ProcessedTask {
+    DatalakeCompute(ProcessedDatalakeCompute),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedDatalakeCompute {
+    /// encoded computational task
+    pub encoded_task: Bytes,
+    /// computational task commitment
+    pub task_commitment: B256,
+    /// raw evaluation result of target compiled task
+    pub compiled_result: U256,
+    /// results merkle tree's entry value
+    pub result_commitment: B256,
+    /// merkle proof for tasks
+    pub task_proof: Vec<B256>,
+    /// merkle proof for results
+    pub result_proof: Vec<B256>,
+    /// encoded datalake
+    pub encoded_datalake: Bytes,
+    // ex. block sampled datalake / transaction datalake
+    pub datalake_type: u8,
+    // ex. "header", "account", "storage"
+    pub property_type: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedMPTProof {
+    pub block_number: u64,
+    pub proof: Vec<Bytes>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedBlockProofs {
+    pub chain_id: u128,
+    pub mmr_with_headers: Vec<MMRWithHeader>,
+    pub accounts: Vec<ProcessedAccount>,
+    pub storages: Vec<ProcessedStorage>,
+    pub transactions: Vec<ProcessedTransaction>,
+    pub transaction_receipts: Vec<ProcessedReceipt>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedReceipt {
+    pub key: String,
+    pub block_number: u64,
+    pub proof: Vec<Bytes>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedTransaction {
+    pub key: String,
+    pub block_number: u64,
+    pub proof: Vec<Bytes>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedAccount {
+    pub address: Address,
+    pub account_key: String,
+    pub proofs: Vec<ProcessedMPTProof>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedStorage {
+    pub address: Address,
+    pub slot: B256,
+    pub storage_key: StorageKey,
+    pub proofs: Vec<ProcessedMPTProof>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct MMRWithHeader {
+    pub mmr_meta: MMRMeta,
+    pub headers: Vec<ProcessedHeader>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct MMRMeta {
+    pub id: u64,
+    pub root: String,
+    pub size: u64,
+    // hex encoded
+    pub peaks: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedHeader {
+    pub rlp: Vec<u8>,
+    pub proof: ProcessedHeaderProof,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProcessedHeaderProof {
+    pub leaf_idx: u64,
+    pub mmr_path: Vec<String>,
+}
+
 pub fn main() {
-    // Read storage key
-    let storage_key = sp1_zkvm::io::read::<String>();
-    // Read storage value
-    let storage_value = sp1_zkvm::io::read::<String>();
-    // read siblings
-    let siblings = sp1_zkvm::io::read::<String>();
-    // read root
-    let root = sp1_zkvm::io::read::<String>();
+    // processor input
+    let processor_input = sp1_zkvm::io::read::<ProcessorInput>();
+
+    // let root = sp1_zkvm::io::read::<String>();
 
     println!("Step 0 - Reading input from the zkVM");
 
     //=========================================================================
 
-    // Step 1. Compute the key hash of target node
-    // [KEY] Current node's key is keccak256(storage_slot)
-    let key_hash = keccak256(storage_key.as_bytes());
-    println!("current key: \n{}\n", key_hash);
-
-    // Step 2. Verify the merkle proof
-    let mut current_hash = key_hash;
-
-    // Decode serialized siblings
-    let siblings_type: DynSolType = "bytes[]".parse().unwrap();
-    let bytes = Vec::from_hex(siblings).expect("Invalid hex string");
-    let serialized_siblings = siblings_type.abi_decode(&bytes).unwrap();
-
-    if let Some(siblings) = serialized_siblings.as_array() {
-        for (i, sibling) in siblings.iter().enumerate() {
-            // Step 2: Decode the siblings
-            // RLP decode the RLP encoded node
-            let sibling_hex = format!("0x{}", hex::encode(sibling.as_bytes().unwrap()));
-            let siblings_bytes = hex::decode(sibling_hex.as_bytes()).expect("Invalid hex string");
-            let siblings_rlp = Rlp::new(&siblings_bytes);
-            let node = siblings_rlp.data().unwrap();
-
-            // Step 2.1: Compute the Key of the sibling node
-            let mut hasher = Keccak256::new();
-            hasher.update(node);
-            hasher.update(current_hash);
-            current_hash = hasher.finalize();
-
-            println!("sibling key: \n{:?}\n", current_hash);
-        }
-    }
-
-    // Step 3. Verify the root
-    let root_bytes: FixedBytes<32> = FixedBytes::from_hex(root).unwrap();
-    // Computed hash should match the given root
-    // TODO: Uncomment this after fixing the issue
-    // if current_hash != root_bytes.as_slice() {
-    //     println!(
-    //         "original root: \n{:?}\n",
-    //         hex::encode(root_bytes.as_slice())
-    //     );
-
-    //     panic!("Invalid merkle proof :/");
-    // }
-    // println!("✅ åMerkle proof verified");
+    // 0. decode task => list out target values to be verified
+    // 1. verify Header (MMR)
+    // 2. verify Account/Storage/Transaction/Receipt (MPT)
+    // 3. retrieve verified values + compute result
+    // 4. construct fact hash and commit
 
     //=========================================================================
 
-    sp1_zkvm::io::commit(&storage_value);
+    sp1_zkvm::io::commit(&processor_input.tasks_root.to_string());
 }

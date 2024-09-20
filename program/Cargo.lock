@@ -1243,6 +1243,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-primitives",
  "rlp 0.4.6",
+ "serde",
  "sp1-zkvm",
  "tiny-keccak",
 ]
